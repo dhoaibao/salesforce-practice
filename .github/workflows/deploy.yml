@@ -19,7 +19,7 @@ on:
 
 jobs:
   deploy:
-    name: Deploy
+    name: Deploy to ${{ inputs.environment || 'auto' }}
     runs-on: ubuntu-latest
     
     steps:
