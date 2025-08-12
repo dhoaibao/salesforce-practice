@@ -9,6 +9,7 @@ on:
           type: choice
           options:
             - sandbox
+            - dev
 
 jobs:
   deploy:
