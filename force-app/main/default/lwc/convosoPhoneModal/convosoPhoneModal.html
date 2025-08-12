@@ -1,0 +1,49 @@
+<template>
+    <!-- Initial login screen -->
+    <div if:true={showInitialScreen} class="modal-container">
+        <img src={convosoLogoUrl} alt="Convoso Logo" class="logo" />
+        <div class="login-message">Please log in to Convoso.</div>
+        <div class="login-button-container">
+            <lightning-button class="login-button" label="Login" variant="brand" onclick={handleLogin}></lightning-button>
+        </div>
+    </div>
+
+    <!-- Welcome screen after successful login -->
+    <div if:true={showWelcomeScreen} class="welcome-container">
+        <img src={convosoLogoUrl} alt="Convoso Logo" class="welcome-logo" />
+        <div class="welcome-message">Welcome, {loggedInUser}!</div>
+        
+        <div class="selection-container">
+            <div class="dropdown-container">
+                <lightning-combobox
+                    name="campaign"
+                    placeholder="Select campaign"
+                    options={campaignOptions}
+                    value={selectedCampaign}
+                    onchange={handleCampaignChange}
+                    class="campaign-dropdown">
+                </lightning-combobox>
+            </div>
+            
+            <div class="dropdown-container">
+                <lightning-combobox
+                    name="status"
+                    placeholder="Select status"
+                    options={statusOptions}
+                    value={selectedStatus}
+                    onchange={handleStatusChange}
+                    class="status-dropdown">
+                </lightning-combobox>
+            </div>
+            
+            <div class="next-button-container">
+                <lightning-button 
+                    class="next-button" 
+                    label="Next" 
+                    variant="brand" 
+                    onclick={handleNext}>
+                </lightning-button>
+            </div>
+        </div>
+    </div>
+</template>
