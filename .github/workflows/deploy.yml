@@ -18,14 +18,13 @@ on:
           - production
 
 jobs:
-  deploy:
-    name: Deploy
+  determine-environment:
+    name: Determine Environment
     runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.env.outputs.environment }}
     
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-
       - name: Determine Environment
         id: env
         run: |
@@ -41,8 +40,17 @@ jobs:
           fi
           
           echo "environment=$ENV" >> $GITHUB_OUTPUT
-          
           echo "Target Environment: $ENV"
+
+  deploy:
+    name: Deploy to ${{ needs.determine-environment.outputs.environment }}
+    runs-on: ubuntu-latest
+    needs: determine-environment
+    environment: ${{ needs.determine-environment.outputs.environment }}
+    
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -66,6 +74,8 @@ jobs:
             --alias ${{ secrets.SF_ORG }} \
             --instance-url ${{ secrets.SF_INSTANCE_URL }}
 
-      - name: Deploy to ${{ secrets.SF_ORG }}
+      - name: Deploy to ${{ needs.determine-environment.outputs.environment }}
         run: |
+          ENV="${{ needs.determine-environment.outputs.environment }}"
+          echo "Deploying to $ENV environment..."
           sf project deploy start --manifest force-app/manifest/package.xml --target-org ${{ secrets.SF_ORG }} --ignore-conflicts
