@@ -20,8 +20,15 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Install Salesforce CLI
-        uses: salesforcecli/github-action@v1
+        run: |
+          npm install -g @salesforce/cli
+          sf version
 
       - name: Write Key File
         run: echo "${{ secrets.SF_JWT_KEY }}" > server.key
