@@ -14,8 +14,6 @@ on:
         type: choice
         options:
           - dev
-          - uat  
-          - production
 
 jobs:
   determine-environment:
@@ -33,9 +31,7 @@ jobs:
           else
             case "${{ github.ref_name }}" in
               "develop") ENV="dev" ;;
-              "uat")     ENV="uat" ;;
-              "production")    ENV="production" ;;
-              *)         ENV="dev" ;;  # Default
+              *)         ENV="dev" ;;
             esac
           fi
           
