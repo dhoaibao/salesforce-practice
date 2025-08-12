@@ -1,0 +1,71 @@
+name: deploy
+
+on:
+  push:
+    branches:
+      - develop
+  
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - uat  
+          - production
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Determine Environment
+        id: env
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            ENV="${{ github.event.inputs.environment }}"
+          else
+            case "${{ github.ref_name }}" in
+              "develop") ENV="dev" ;;
+              "uat")     ENV="uat" ;;
+              "production")    ENV="production" ;;
+              *)         ENV="dev" ;;  # Default
+            esac
+          fi
+          
+          echo "environment=$ENV" >> $GITHUB_OUTPUT
+          
+          echo "Target Environment: $ENV"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Salesforce CLI
+        run: |
+          npm install -g @salesforce/cli
+          sf version
+
+      - name: Write Key File
+        run: echo "${{ secrets.SF_JWT_KEY }}" > server.key
+
+      - name: Authenticate with JWT
+        run: |
+          sf org login jwt \
+            --client-id ${{ secrets.SF_CLIENT_ID }} \
+            --jwt-key-file ./server.key \
+            --username ${{ secrets.SF_USERNAME }} \
+            --alias ${{ secrets.SF_ORG }} \
+            --instance-url ${{ secrets.SF_INSTANCE_URL }}
+
+      - name: Deploy to ${{ secrets.SF_ORG }}
+        run: |
+          sf project deploy start --manifest force-app/manifest/package.xml --target-org ${{ secrets.SF_ORG }} --ignore-conflicts
