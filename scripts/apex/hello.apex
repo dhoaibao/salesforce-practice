@@ -5,5 +5,5 @@
 // You can also execute the entire file by running the command:
 //     SFDX: Execute Anonymous Apex with Editor Contents
 
-String token = AuthenticationService.createSession();
+Object token = AuthenticationController.createSession();
 System.debug(token);
